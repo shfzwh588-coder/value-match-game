@@ -571,6 +571,23 @@ p {
   background: linear-gradient(90deg, var(--blue), var(--cyan), var(--orange));
 }
 
+.board-frame.is-preparing::after {
+  content: "徽章加载中";
+  position: absolute;
+  left: 50%;
+  bottom: 18px;
+  z-index: 5;
+  transform: translateX(-50%);
+  border: 1px solid rgba(23, 105, 224, 0.24);
+  border-radius: 999px;
+  padding: 6px 12px;
+  background: rgba(255, 255, 255, 0.9);
+  color: var(--blue);
+  font-size: 0.82rem;
+  font-weight: 900;
+  box-shadow: 0 10px 24px rgba(23, 32, 51, 0.12);
+}
+
 .board {
   display: grid;
   grid-template-columns: repeat(8, 1fr);

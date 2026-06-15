@@ -88,6 +88,7 @@ let dragStart = null;
 let leaderboard = loadLeaderboard();
 let lastResult = null;
 let isStarting = false;
+let gameRunId = 0;
 
 function wait(ms) {
   return new Promise((resolve) => {
@@ -108,6 +109,30 @@ function preloadImage(src) {
 }
 
 const badgeAssetsReady = Promise.all(BADGES.map((badge) => preloadImage(badge.image)));
+
+function waitForImages(container, timeoutMs = 20000) {
+  const images = [...container.querySelectorAll("img")];
+  const pendingImages = images.filter((image) => !image.complete);
+
+  if (!pendingImages.length) return Promise.resolve();
+
+  const imagesReady = Promise.all(
+    pendingImages.map(
+      (image) =>
+        new Promise((resolve) => {
+          if (image.complete) {
+            resolve();
+            return;
+          }
+          image.addEventListener("load", resolve, { once: true });
+          image.addEventListener("error", resolve, { once: true });
+          if (image.complete) resolve();
+        }),
+    ),
+  );
+
+  return Promise.race([imagesReady, wait(timeoutMs)]);
+}
 
 function randomType() {
   return Math.floor(Math.random() * BADGES.length);
@@ -737,7 +762,9 @@ function endGame() {
     `本局共点亮 ${totalCollected} 枚价值观徽章。价值观不是挂在墙上的口号，而是每一次面对客户、协同伙伴、解决难题时的选择标准。`;
 }
 
-function newGame() {
+async function newGame() {
+  const runId = gameRunId + 1;
+  gameRunId = runId;
   window.clearInterval(timerId);
   gameStarted = true;
   startScreen.classList.add("is-hidden");
@@ -752,15 +779,22 @@ function newGame() {
   score = 0;
   timeLeft = START_SECONDS;
   combo = 1;
-  locked = false;
+  locked = true;
   gameOver = false;
   collected = Object.fromEntries(BADGES.map((badge) => [badge.id, 0]));
   resultModal.classList.remove("is-open");
   resultModal.setAttribute("aria-hidden", "true");
+  document.querySelector(".board-frame").classList.add("is-preparing");
   renderCollections();
   renderLeaderboard();
   updateHud();
   renderBoard();
+  setMessage("徽章加载中，计时马上开始。");
+  await waitForImages(boardEl);
+  if (runId !== gameRunId || gameOver) return;
+  locked = false;
+  document.querySelector(".board-frame").classList.remove("is-preparing");
+  updateHud();
   setMessage("90 秒限时开始，尽可能消除更多徽章。");
   startTimer();
 }
@@ -774,11 +808,10 @@ async function startChallenge() {
   isStarting = true;
   startButton.classList.add("is-loading");
   startButton.setAttribute("aria-busy", "true");
-  startButton.textContent = "加载徽章中";
+  startButton.textContent = "准备棋盘";
   try {
-    await badgeAssetsReady;
     setPlayerName(startPlayerNameInput.value);
-    newGame();
+    await newGame();
   } finally {
     isStarting = false;
     startButton.classList.remove("is-loading");
