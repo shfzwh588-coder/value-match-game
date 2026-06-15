@@ -727,6 +727,9 @@ function newGame() {
   gameStarted = true;
   startScreen.classList.add("is-hidden");
   gameShell.classList.remove("is-hidden");
+  window.requestAnimationFrame(() => {
+    window.scrollTo({ top: 0, left: 0, behavior: "auto" });
+  });
   savePlayerName();
   board = buildBoard();
   ensurePlayableBoard();
