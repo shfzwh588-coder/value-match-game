@@ -268,7 +268,7 @@ function normalizePlayerName(value) {
 
 function updateStartNameState(showError = false) {
   const hasName = Boolean(normalizePlayerName(startPlayerNameInput.value));
-  startButton.disabled = !hasName;
+  startButton.classList.toggle("is-waiting-name", !hasName);
   startNameField.classList.toggle("is-invalid", showError && !hasName);
   startPlayerNameInput.setAttribute("aria-invalid", String(showError && !hasName));
   nameError.textContent = showError && !hasName ? "请输入昵称后开始挑战" : "";

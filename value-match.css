@@ -301,8 +301,7 @@ p {
   box-shadow: 0 14px 28px rgba(23, 105, 224, 0.2);
 }
 
-.start-button:disabled {
-  cursor: not-allowed;
+.start-button.is-waiting-name {
   border-color: rgba(119, 151, 194, 0.42);
   background: linear-gradient(135deg, #91a4bd, #b9c7d8);
   box-shadow: none;
