@@ -1,0 +1,149 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta
+      name="description"
+      content="使用五枚企业价值观徽章制作的价值观消消乐小游戏。"
+    />
+    <title>价值观消消乐</title>
+    <link rel="stylesheet" href="value-match.css" />
+    <script src="value-match.js" defer></script>
+  </head>
+  <body>
+    <section id="startScreen" class="start-screen" aria-label="游戏开始页">
+      <div class="start-panel">
+        <p class="start-eyebrow">价值观消消乐</p>
+        <h1>90 秒价值观挑战</h1>
+        <p class="start-copy">输入昵称，点亮徽章，冲击排行榜。</p>
+
+        <section class="start-values" aria-label="五项价值观">
+          <p>本场挑战点亮五项价值观</p>
+          <div class="start-value-grid">
+            <strong>客户第一</strong>
+            <strong>团队协作</strong>
+            <strong>拼搏进取</strong>
+            <strong>持续学习</strong>
+            <strong>创新创业</strong>
+          </div>
+        </section>
+
+        <label class="start-name-field" for="startPlayerName">
+          <span>我的昵称</span>
+          <input id="startPlayerName" maxlength="10" value="玩家" autocomplete="off" />
+        </label>
+
+        <section class="start-rules" aria-label="记分规则">
+          <h2>记分规则</h2>
+          <ul>
+            <li><strong>90 秒限时冲分</strong><span>时间结束后自动结算并进入排行榜。</span></li>
+            <li><strong>三枚即可消除</strong><span>交换相邻徽章，连成三枚及以上即可得分。</span></li>
+            <li><strong>客户第一更高分</strong><span>客户第一徽章得分为其他徽章的 1.5 倍。</span></li>
+            <li><strong>连续消除有连击</strong><span>连击越多，单轮得分越高。</span></li>
+            <li><strong>重排扣 8 秒</strong><span>需要重排时可以使用，但会消耗挑战时间。</span></li>
+          </ul>
+        </section>
+
+        <button id="startButton" class="start-button" type="button">开始挑战</button>
+      </div>
+    </section>
+
+    <main id="gameShell" class="app-shell is-hidden">
+      <section class="topbar" aria-label="游戏状态">
+        <div class="brand-block">
+          <span class="brand-mark" aria-hidden="true">V</span>
+          <div>
+            <h1>价值观消消乐</h1>
+            <p>连成三枚及以上，点亮五种价值观徽章</p>
+          </div>
+        </div>
+
+        <div class="stats-grid">
+          <div class="stat-card">
+            <span>分数</span>
+            <strong id="scoreText">0</strong>
+          </div>
+          <div class="stat-card">
+            <span>时间</span>
+            <strong id="timeText">01:30</strong>
+          </div>
+          <div class="stat-card">
+            <span>最高分</span>
+            <strong id="bestText">0</strong>
+          </div>
+        </div>
+      </section>
+
+      <section class="game-layout">
+        <section class="board-zone" aria-label="消消乐棋盘">
+          <div class="board-frame">
+            <div id="board" class="board" role="grid" aria-label="8乘8价值观徽章棋盘"></div>
+            <div id="floatingScore" class="floating-score" aria-hidden="true"></div>
+          </div>
+          <div class="action-row">
+            <button id="hintButton" type="button">提示</button>
+            <button id="shuffleButton" type="button">重排</button>
+          </div>
+        </section>
+
+        <aside class="side-panel collection-panel" aria-label="价值观收集进度">
+          <div class="panel-heading">
+            <h2>价值观收集</h2>
+            <button id="newGameButton" type="button">再挑战</button>
+          </div>
+          <div id="collectionList" class="collection-list"></div>
+        </aside>
+
+        <input id="playerName" class="is-hidden" maxlength="10" value="玩家" autocomplete="off" />
+      </section>
+    </main>
+
+    <div id="resultModal" class="result-modal" aria-hidden="true">
+      <div class="result-card" role="dialog" aria-modal="true" aria-labelledby="resultTitle">
+        <section id="resultSummaryView">
+          <div class="result-medal" aria-hidden="true">V</div>
+          <p class="result-eyebrow">价值观挑战完成</p>
+          <h2 id="resultTitle">挑战完成</h2>
+          <p id="resultText" class="result-lead"></p>
+          <div class="result-stats" aria-label="本局成绩">
+            <div>
+              <span>本局得分</span>
+              <strong id="resultScore">0</strong>
+            </div>
+            <div>
+              <span>排行榜</span>
+              <strong id="resultRank">继续冲榜</strong>
+            </div>
+            <div>
+              <span>客户第一</span>
+              <strong id="resultCustomer">0</strong>
+            </div>
+          </div>
+          <p id="resultValueText" class="result-value-text"></p>
+          <div class="result-actions">
+            <button id="resultLeaderboardButton" class="secondary-button" type="button">查看排行榜</button>
+            <button id="resultButton" type="button">再挑战</button>
+          </div>
+        </section>
+
+        <section id="resultLeaderboardView" class="is-hidden">
+          <p class="result-eyebrow">价值观排行榜</p>
+          <h2 class="leaderboard-title">排行榜</h2>
+          <div id="myRankCard" class="my-rank-card"></div>
+          <div class="result-leaderboard-block">
+            <div class="leaderboard-view-heading">
+              <span>前 10 名</span>
+              <span>分数</span>
+            </div>
+            <ol id="resultLeaderboardList" class="result-leaderboard-list"></ol>
+          </div>
+          <div class="result-actions">
+            <button id="backToResultButton" class="secondary-button" type="button">返回</button>
+            <button id="resultRestartFromRankButton" type="button">再挑战</button>
+          </div>
+        </section>
+      </div>
+    </div>
+  </body>
+</html>
