@@ -87,8 +87,8 @@ let collected = Object.fromEntries(BADGES.map((badge) => [badge.id, 0]));
 let dragStart = null;
 let leaderboard = loadLeaderboard();
 let lastResult = null;
-let isStarting = false;
 let gameRunId = 0;
+let lastStartTap = 0;
 
 function wait(ms) {
   return new Promise((resolve) => {
@@ -762,7 +762,15 @@ function endGame() {
     `本局共点亮 ${totalCollected} 枚价值观徽章。价值观不是挂在墙上的口号，而是每一次面对客户、协同伙伴、解决难题时的选择标准。`;
 }
 
-async function newGame() {
+function prepareTimer(runId, boardFrame) {
+  locked = false;
+  boardFrame.classList.remove("is-preparing");
+  updateHud();
+  setMessage("90 秒限时开始，尽可能消除更多徽章。");
+  startTimer();
+}
+
+function newGame() {
   const runId = gameRunId + 1;
   gameRunId = runId;
   window.clearInterval(timerId);
@@ -770,7 +778,7 @@ async function newGame() {
   startScreen.classList.add("is-hidden");
   gameShell.classList.remove("is-hidden");
   window.requestAnimationFrame(() => {
-    window.scrollTo({ top: 0, left: 0, behavior: "auto" });
+    window.scrollTo(0, 0);
   });
   savePlayerName();
   board = buildBoard();
@@ -784,41 +792,36 @@ async function newGame() {
   collected = Object.fromEntries(BADGES.map((badge) => [badge.id, 0]));
   resultModal.classList.remove("is-open");
   resultModal.setAttribute("aria-hidden", "true");
-  document.querySelector(".board-frame").classList.add("is-preparing");
+  const boardFrame = document.querySelector(".board-frame");
+  boardFrame.classList.add("is-preparing");
   renderCollections();
   renderLeaderboard();
   updateHud();
   renderBoard();
   setMessage("徽章加载中，计时马上开始。");
-  await waitForImages(boardEl);
-  if (runId !== gameRunId || gameOver) return;
-  locked = false;
-  document.querySelector(".board-frame").classList.remove("is-preparing");
-  updateHud();
-  setMessage("90 秒限时开始，尽可能消除更多徽章。");
-  startTimer();
+  waitForImages(boardEl, 6000).then(() => {
+    if (runId !== gameRunId || gameOver) return;
+    prepareTimer(runId, boardFrame);
+  });
 }
 
-async function startChallenge() {
-  if (isStarting) return;
+function startChallenge() {
   if (!updateStartNameState(true)) {
     startPlayerNameInput.focus();
     return;
   }
-  isStarting = true;
-  startButton.classList.add("is-loading");
-  startButton.setAttribute("aria-busy", "true");
-  startButton.textContent = "准备棋盘";
-  try {
-    setPlayerName(startPlayerNameInput.value);
-    await newGame();
-  } finally {
-    isStarting = false;
-    startButton.classList.remove("is-loading");
-    startButton.removeAttribute("aria-busy");
-    startButton.textContent = "开始挑战";
-    updateStartNameState(false);
+  setPlayerName(startPlayerNameInput.value);
+  newGame();
+}
+
+function handleStartPress(event) {
+  if (event && event.type === "touchend" && event.cancelable) {
+    event.preventDefault();
   }
+  const now = Date.now();
+  if (now - lastStartTap < 350) return;
+  lastStartTap = now;
+  startChallenge();
 }
 
 setPlayerName("");
@@ -826,7 +829,8 @@ renderCollections();
 renderLeaderboard();
 updateHud();
 
-startButton.addEventListener("click", startChallenge);
+startButton.addEventListener("click", handleStartPress);
+startButton.addEventListener("touchend", handleStartPress, false);
 startPlayerNameInput.addEventListener("keydown", (event) => {
   if (event.key === "Enter") startChallenge();
 });
