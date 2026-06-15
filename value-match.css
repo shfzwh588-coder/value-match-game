@@ -234,6 +234,19 @@ p {
   box-shadow: 0 0 0 3px rgba(23, 105, 224, 0.12);
 }
 
+.start-name-field.is-invalid input {
+  border-color: rgba(255, 144, 25, 0.72);
+  box-shadow: 0 0 0 3px rgba(255, 144, 25, 0.13);
+}
+
+.name-error {
+  grid-column: 2;
+  min-height: 18px;
+  color: #f04f64;
+  font-size: 0.78rem;
+  font-weight: 720;
+}
+
 .start-rules {
   margin-top: 20px;
   text-align: left;
@@ -286,6 +299,13 @@ p {
   background: linear-gradient(135deg, var(--navy), var(--blue));
   color: #ffffff;
   box-shadow: 0 14px 28px rgba(23, 105, 224, 0.2);
+}
+
+.start-button:disabled {
+  cursor: not-allowed;
+  border-color: rgba(119, 151, 194, 0.42);
+  background: linear-gradient(135deg, #91a4bd, #b9c7d8);
+  box-shadow: none;
 }
 
 .app-shell {
@@ -1039,6 +1059,10 @@ p {
   .start-name-field {
     grid-template-columns: 1fr;
     gap: 7px;
+  }
+
+  .name-error {
+    grid-column: 1;
   }
 
   .app-shell {

@@ -31,7 +31,8 @@
 
         <label class="start-name-field" for="startPlayerName">
           <span>我的昵称</span>
-          <input id="startPlayerName" maxlength="10" value="玩家" autocomplete="off" />
+          <input id="startPlayerName" maxlength="10" placeholder="请输入昵称" autocomplete="off" aria-describedby="nameError" />
+          <small id="nameError" class="name-error" aria-live="polite"></small>
         </label>
 
         <section class="start-rules" aria-label="记分规则">
@@ -95,7 +96,7 @@
           <div id="collectionList" class="collection-list"></div>
         </aside>
 
-        <input id="playerName" class="is-hidden" maxlength="10" value="玩家" autocomplete="off" />
+        <input id="playerName" class="is-hidden" maxlength="10" autocomplete="off" />
       </section>
     </main>
 

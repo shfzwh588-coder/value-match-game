@@ -45,6 +45,8 @@ const PLAYER_NAME_KEY = "value-match-player-name";
 const startScreen = document.querySelector("#startScreen");
 const gameShell = document.querySelector("#gameShell");
 const startPlayerNameInput = document.querySelector("#startPlayerName");
+const startNameField = startPlayerNameInput.closest(".start-name-field");
+const nameError = document.querySelector("#nameError");
 const startButton = document.querySelector("#startButton");
 const boardEl = document.querySelector("#board");
 const scoreText = document.querySelector("#scoreText");
@@ -225,6 +227,7 @@ function bestEntriesByName(entries) {
     if (!entry || typeof entry !== "object") continue;
 
     const name = normalizePlayerName(entry.name);
+    if (!name) continue;
     const scoreValue = Number(entry.score);
     if (!Number.isFinite(scoreValue) || scoreValue <= 0) continue;
 
@@ -260,19 +263,32 @@ function saveLeaderboard() {
 }
 
 function normalizePlayerName(value) {
-  return (value || "").trim() || "玩家";
+  return (value || "").trim();
+}
+
+function updateStartNameState(showError = false) {
+  const hasName = Boolean(normalizePlayerName(startPlayerNameInput.value));
+  startButton.disabled = !hasName;
+  startNameField.classList.toggle("is-invalid", showError && !hasName);
+  startPlayerNameInput.setAttribute("aria-invalid", String(showError && !hasName));
+  nameError.textContent = showError && !hasName ? "请输入昵称后开始挑战" : "";
+  return hasName;
 }
 
 function setPlayerName(name) {
   const normalized = normalizePlayerName(name);
   playerNameInput.value = normalized;
   startPlayerNameInput.value = normalized;
-  window.localStorage.setItem(PLAYER_NAME_KEY, normalized);
+  if (normalized) {
+    window.localStorage.setItem(PLAYER_NAME_KEY, normalized);
+  } else {
+    window.localStorage.removeItem(PLAYER_NAME_KEY);
+  }
+  updateStartNameState(false);
 }
 
 function playerName() {
-  const value = playerNameInput.value.trim();
-  return value || "玩家";
+  return normalizePlayerName(playerNameInput.value);
 }
 
 function savePlayerName() {
@@ -732,12 +748,15 @@ function newGame() {
 }
 
 function startChallenge() {
+  if (!updateStartNameState(true)) {
+    startPlayerNameInput.focus();
+    return;
+  }
   setPlayerName(startPlayerNameInput.value);
   newGame();
 }
 
-const savedPlayerName = window.localStorage.getItem(PLAYER_NAME_KEY) || "玩家";
-setPlayerName(savedPlayerName);
+setPlayerName("");
 renderCollections();
 renderLeaderboard();
 updateHud();
@@ -746,8 +765,8 @@ startButton.addEventListener("click", startChallenge);
 startPlayerNameInput.addEventListener("keydown", (event) => {
   if (event.key === "Enter") startChallenge();
 });
-startPlayerNameInput.addEventListener("change", () => setPlayerName(startPlayerNameInput.value));
-startPlayerNameInput.addEventListener("blur", () => setPlayerName(startPlayerNameInput.value));
+startPlayerNameInput.addEventListener("input", () => updateStartNameState(false));
+startPlayerNameInput.addEventListener("blur", () => updateStartNameState(Boolean(nameError.textContent)));
 playerNameInput.addEventListener("change", savePlayerName);
 playerNameInput.addEventListener("blur", savePlayerName);
 newGameButton.addEventListener("click", newGame);
