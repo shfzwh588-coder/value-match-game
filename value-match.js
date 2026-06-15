@@ -87,12 +87,27 @@ let collected = Object.fromEntries(BADGES.map((badge) => [badge.id, 0]));
 let dragStart = null;
 let leaderboard = loadLeaderboard();
 let lastResult = null;
+let isStarting = false;
 
 function wait(ms) {
   return new Promise((resolve) => {
     window.setTimeout(resolve, ms);
   });
 }
+
+function preloadImage(src) {
+  return new Promise((resolve) => {
+    const image = new Image();
+    const finish = () => resolve(src);
+    image.decoding = "async";
+    image.addEventListener("load", finish, { once: true });
+    image.addEventListener("error", finish, { once: true });
+    image.src = src;
+    if (image.complete) finish();
+  });
+}
+
+const badgeAssetsReady = Promise.all(BADGES.map((badge) => preloadImage(badge.image)));
 
 function randomType() {
   return Math.floor(Math.random() * BADGES.length);
@@ -750,13 +765,27 @@ function newGame() {
   startTimer();
 }
 
-function startChallenge() {
+async function startChallenge() {
+  if (isStarting) return;
   if (!updateStartNameState(true)) {
     startPlayerNameInput.focus();
     return;
   }
-  setPlayerName(startPlayerNameInput.value);
-  newGame();
+  isStarting = true;
+  startButton.classList.add("is-loading");
+  startButton.setAttribute("aria-busy", "true");
+  startButton.textContent = "加载徽章中";
+  try {
+    await badgeAssetsReady;
+    setPlayerName(startPlayerNameInput.value);
+    newGame();
+  } finally {
+    isStarting = false;
+    startButton.classList.remove("is-loading");
+    startButton.removeAttribute("aria-busy");
+    startButton.textContent = "开始挑战";
+    updateStartNameState(false);
+  }
 }
 
 setPlayerName("");

@@ -307,6 +307,13 @@ p {
   box-shadow: none;
 }
 
+.start-button.is-loading {
+  pointer-events: none;
+  border-color: rgba(23, 105, 224, 0.36);
+  background: linear-gradient(135deg, var(--blue), var(--cyan));
+  box-shadow: 0 14px 30px rgba(23, 105, 224, 0.18);
+}
+
 .app-shell {
   display: grid;
   grid-template-rows: auto minmax(0, 1fr);
